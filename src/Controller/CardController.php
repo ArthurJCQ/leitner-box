@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Controller;
 
 use App\Entity\Card;
-use App\Form\AnswerType;
 use App\Form\CardType;
 use App\Repository\CardRepository;
 use App\Service\FileHandler;
@@ -76,11 +75,11 @@ class CardController extends AbstractController
     public function solveCard(Card $card, Request $request): Response
     {
         $answer = $request->request->get('answer');
-        $isSolved = $this->handleCardSolving->execute($card, $answer);
+        $isSolved = $this->handleCardSolving->execute($card, (string) $answer);
 
         $this->addFlash(
             $isSolved ? 'success' : 'danger',
-            $isSolved ? 'Bonne réponse !' : 'Mauvaise réponse ! Revenez Demain pour vous tester à nouveau sur cette carte',
+            $isSolved ? 'Bonne réponse !' : 'Mauvaise réponse ! À demain pour vous tester à nouveau sur cette carte',
         );
 
         $this->entityManager->flush();
@@ -108,6 +107,7 @@ class CardController extends AbstractController
                 }
             }
 
+            /** @var Card $card */
             $card = $form->getData();
             $card->setImage($newFilename ?? $existingImg);
 

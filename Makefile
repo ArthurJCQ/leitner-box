@@ -5,7 +5,7 @@ audit: phpcs phpmd phpstan ## Run static code analysis
 .PHONY: audit
 
 phpcs: ## Run PHP_CodeSniffer
-	vendor/bin/phpcs --standard=phpcs.xml --extensions=php --ignore=vendor --cache=.phpcs-cache $(EXTRA_ARGS) .
+	vendor/bin/phpcs --standard=phpcs.xml --extensions=php --ignore=*/vendor,*/var,*/config,*/migrations,*/public,*/tests/bootstrap.php,importmap.php --cache=.phpcs-cache $(EXTRA_ARGS) .
 phpcs-ci: prepare-ci ## Run PHP_CodeSniffer (CI)
 	EXTRA_ARGS="--report=junit --report-file=$(REPORTS_DIR)/phpcs.junit.xml" $(MAKE) phpcs
 .PHONY: phpcs phpcs-ci

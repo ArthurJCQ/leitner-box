@@ -1,7 +1,0 @@
-<?xml version="1.0"?>
-<ruleset name="Arty Coding Standard"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="../../vendor/squizlabs/php_codesniffer/phpcs.xsd">
-    <rule ref="./vendor/arty/php-coding-standard/lib/phpcs/phpcs.xml" />
-    <exclude-pattern>src/Kernel.php</exclude-pattern>
-</ruleset>

@@ -1,0 +1,2 @@
+includes:
+    - vendor/arty/php-coding-standard/lib/phpstan/phpstan.neon

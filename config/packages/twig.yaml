@@ -1,5 +1,9 @@
 twig:
     file_name_pattern: '*.twig'
+    form_themes: ['bootstrap_5_layout.html.twig']
+    globals:
+        image_dir: 'uploads/files/'
+        default_img_url: 'https://img.freepik.com/photos-gratuite/paysages-forestiers_71767-127.jpg'
 
 when@test:
     twig:

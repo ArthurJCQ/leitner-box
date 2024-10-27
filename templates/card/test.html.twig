@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Leitner Box{% endblock %}
+
+{% block body %}
+    <style>
+        .example-wrapper { margin: 1em auto; max-width: 1200px; width: 95%; font: 18px/1.5 sans-serif; }
+    </style>
+
+    <div class="example-wrapper">
+        {% if cards|length == 0 %}
+            <p>Aucune carte à tester aujourd'hui !</p>
+        {% endif %}
+        <div class="row">
+            {% for card in cards %}
+                <div class="card col-md-4 p-0 m-2" style="max-width: 24rem; {{ card.active ? '' : 'filter: grayscale(80%);' }}">
+                    <img src="{{ card.image ? asset(image_dir ~ card.image) : default_img_url }}" class="card-img-top" alt="card-image" style="max-height: 300px">
+                    <div class="card-body d-flex flex-column justify-content-between">
+                        <p class="card-text">{{ card.question }}</p>
+                        <div class="d-flex justify-content-between">
+                            <form method="post" action="/card/solve/{{ card.id }}">
+                                <label for="answer-{{ card.id }}">Réponse :</label>
+                                <input id="answer-{{ card.id }}" type="text" name="answer" class="form-control" placeholder="Réponse" />
+                                <button class="btn btn-primary" type="submit" style="margin-top: 16px">Soumettre</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    <script>
+        function handleSeeAnswerClick(id) {
+            const answer = document.getElementById(`answer-${id}`);
+
+            if (answer.style.filter !== '') {
+                answer.style.filter = '';
+
+                return;
+            }
+
+            answer.style.filter = 'blur(5px)';
+        }
+    </script>
+    {{ parent() }}
+{% endblock %}

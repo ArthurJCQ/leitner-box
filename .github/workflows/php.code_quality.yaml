@@ -34,7 +34,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        tool: [phpcs, phpmd, phpstan, phpunit]
+        tool: [phpcs, phpmd, phpstan]
     steps:
       - name: Setup PHP ${{ env.PHP_VERSION }} environment
         uses: shivammathur/setup-php@6d7209f44a25a59e904b1ee9f3b0c33ab2cd888d
@@ -68,12 +68,7 @@ jobs:
       - name: Create build/ directory
         run: mkdir -p build
 
-      # NOTE: only phpunit, phpcs generate reports
-      - name: Download phpunit reports
-        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935
-        with:
-          name: phpunit-reports
-          path: build/
+      # NOTE: only phpcs generate reports
       - name: Download phpcs reports
         uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935
         with:

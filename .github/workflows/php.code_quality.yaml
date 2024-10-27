@@ -1,0 +1,87 @@
+name: PHP - Code quality
+
+on:
+  pull_request:
+
+env:
+  PHP_VERSION: 8.3.0
+
+jobs:
+  cache_dependencies:
+    name: Fetch composer dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fetch latest changes
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+      - name: Prepare/restore dependencies cache
+        uses: actions/cache@13aacd865c20de90d75de3b17ebe84f7a17d57d2
+        with:
+          # NOTE: the allows to reuse it if the composer.json has not changed
+          key: composer/${{ runner.os }}/${{ hashFiles('**/composer.json') }}
+          path: |
+            composer.lock
+            vendor/
+      - name: Install/update dependencies
+        uses: php-actions/composer@8a65f0d3c6a1d17ca4800491a40b5756a4c164f3
+        with:
+          php_version: ${{ env.PHP_VERSION }}
+          args: --ignore-platform-reqs
+
+  php_analysis:
+    name: Code quality checks
+    runs-on: ubuntu-latest
+    needs: [cache_dependencies]
+    strategy:
+      fail-fast: false
+      matrix:
+        tool: [phpcs, phpmd, phpstan, phpunit]
+    steps:
+      - name: Setup PHP ${{ env.PHP_VERSION }} environment
+        uses: shivammathur/setup-php@6d7209f44a25a59e904b1ee9f3b0c33ab2cd888d
+        with:
+          php-version: ${{ env.PHP_VERSION }}
+      - name: Fetch lastest changes
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11
+      - name: Restore dependencies cache
+        uses: actions/cache@13aacd865c20de90d75de3b17ebe84f7a17d57d2
+        with:
+          key: composer/${{ runner.os }}/${{ hashFiles('**/composer.json') }}
+          path: |
+            composer.lock
+            vendor/
+      - name: Run ${{ matrix.tool }}
+        run: make ${{ matrix.tool }}-ci
+      - name: Upload ${{ matrix.tool }} reports
+        uses: actions/upload-artifact@26f96dfa697d77e81fd5907df203aa23a56210a8
+        if: always()
+        with:
+          name: ${{ matrix.tool }}-reports
+          path: build/**/*.junit.xml
+          retention-days: 1
+
+  php_report:
+    name: Report PHP code quality
+    runs-on: ubuntu-latest
+    needs: [php_analysis]
+    if: always()
+    steps:
+      - name: Create build/ directory
+        run: mkdir -p build
+
+      # NOTE: only phpunit, phpcs generate reports
+      - name: Download phpunit reports
+        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935
+        with:
+          name: phpunit-reports
+          path: build/
+      - name: Download phpcs reports
+        uses: actions/download-artifact@6b208ae046db98c579e8a3aa621ab581ff575935
+        with:
+          name: phpcs-reports
+          path: build/
+
+      - name: Report analisys results
+        uses: mikepenz/action-junit-report@5f47764eec0e1c1f19f40c8e60a5ba47e47015c5
+        with:
+          check_name: See PHP code quality reports
+          report_paths: build/reports/*.xml

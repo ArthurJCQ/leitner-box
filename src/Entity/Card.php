@@ -17,10 +17,10 @@ class Card
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $question = null;
+    private string $question;
 
     #[ORM\Column(length: 255)]
-    private ?string $answer = null;
+    private string $answer;
 
     #[ORM\Column(type: Types::DATE_MUTABLE, nullable: true)]
     private ?\DateTimeInterface $initialTestDate = null;
@@ -39,7 +39,7 @@ class Card
         return $this->id;
     }
 
-    public function getQuestion(): ?string
+    public function getQuestion(): string
     {
         return $this->question;
     }
@@ -51,7 +51,7 @@ class Card
         return $this;
     }
 
-    public function getAnswer(): ?string
+    public function getAnswer(): string
     {
         return $this->answer;
     }

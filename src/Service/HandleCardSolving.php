@@ -23,7 +23,7 @@ readonly class HandleCardSolving
         }
 
         // Card solving passed
-        $nextDelayKey = array_search($card->getDelay(), self::TEST_DELAY) + 1;
+        $nextDelayKey = array_search($card->getDelay(), self::TEST_DELAY, true) + 1;
 
         if (!isset(self::TEST_DELAY[$nextDelayKey])) {
             $card->setInitialTestDate(null)

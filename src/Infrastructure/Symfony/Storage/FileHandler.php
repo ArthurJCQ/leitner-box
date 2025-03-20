@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Service;
+namespace Infrastructure\Symfony\Storage;
 
+use Application\Storage\FileHandlerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\String\Slugger\SluggerInterface;
 
-readonly class FileHandler
+readonly class FileHandler implements FileHandlerInterface
 {
     public function __construct(
         private SluggerInterface $slugger,
@@ -16,13 +17,14 @@ readonly class FileHandler
     ) {
     }
 
-    public function handleFile(UploadedFile $file): string
+    /** @param UploadedFile $file */
+    public function handleFile(mixed $file, string $directory): string
     {
         $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
         $safeFilename = $this->slugger->slug($originalFilename);
         $newFilename = $safeFilename . '-' . uniqid('', true) . '.' . $file->guessExtension();
 
-        $file->move($this->fileDirectory, $newFilename);
+        $file->move(sprintf('%s/%s', $this->fileDirectory, $directory), $newFilename);
 
         return $newFilename;
     }

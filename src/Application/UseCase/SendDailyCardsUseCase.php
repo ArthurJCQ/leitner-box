@@ -2,26 +2,30 @@
 
 declare(strict_types=1);
 
-namespace App\Service;
+namespace Application\UseCase;
 
-use Symfony\Component\Mailer\MailerInterface;
-use Symfony\Component\Mime\Email;
+use Domain\Notification;
+use Domain\Repository\CardRepositoryInterface;
 
-readonly class AppMailer
+readonly class SendDailyCardsUseCase
 {
     public function __construct(
-        private MailerInterface $mailer,
-        private string $appDns,
+        private CardRepositoryInterface $cardRepository,
+        private Notification $mailer,
         private string $userEmail,
+        private string $appDns,
     ) {
     }
 
-    public function sendTestCardsNotification(int $cardsNumber): void
+    public function execute(): void
     {
-        $subject = $cardsNumber
+        $cardsToTest = $this->cardRepository->findTodayCards();
+        $cardsNumber = iterator_count($cardsToTest);
+
+        $mailSubject = $cardsNumber
             ? 'Des cartes sont prêtes à être révisées !'
             : 'Pas de révision aujourd\'hui';
-        $htmlBody = $cardsNumber
+        $mailHtmlBody = $cardsNumber
             ? sprintf(
                 '<h2>C\'est l\'heure du test !</h2>
                     <p>Vous avez %d cartes à passer en revue aujourd\'hui !</p>
@@ -32,12 +36,6 @@ readonly class AppMailer
             : '<h2>Aujourd\'hui, c\'est repos !</h2>
                 <p>Aucune carte a passer en revue ce jour.</p>';
 
-        $email = (new Email())
-            ->from('leitner@box.com')
-            ->to($this->userEmail)
-            ->subject($subject)
-            ->html($htmlBody);
-
-        $this->mailer->send($email);
+        $this->mailer->sendTestCardsNotification($this->userEmail, $mailSubject, $mailHtmlBody);
     }
 }

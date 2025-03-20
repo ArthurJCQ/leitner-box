@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\Command;
+namespace Infrastructure\Symfony\Command;
 
-use App\Repository\CardRepository;
-use App\Service\AppMailer;
+use Application\UseCase\SendDailyCardsUseCase;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -17,10 +16,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class DailyTestNotifCommand extends Command
 {
-    public function __construct(
-        private readonly CardRepository $cardRepository,
-        private readonly AppMailer $appMailer,
-    ) {
+    public function __construct(private readonly SendDailyCardsUseCase $sendDailyCardsUseCase) {
         parent::__construct();
     }
 
@@ -30,9 +26,7 @@ class DailyTestNotifCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $cardsToTest = $this->cardRepository->findTodayCards();
-
-        $this->appMailer->sendTestCardsNotification(iterator_count($cardsToTest));
+        $this->sendDailyCardsUseCase->execute();
 
         return Command::SUCCESS;
     }

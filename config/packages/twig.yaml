@@ -1,4 +1,5 @@
 twig:
+    default_path: '%kernel.project_dir%/src/Infrastructure/Symfony/templates'
     file_name_pattern: '*.twig'
     form_themes: ['bootstrap_5_layout.html.twig']
     globals:

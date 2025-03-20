@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Service;
+namespace Application\UseCase;
 
-use App\Entity\Card;
+use Domain\Card;
 
-readonly class HandleCardSolving
+readonly class SolveCardUseCase
 {
     public const array TEST_DELAY = [1, 3, 7, 15, 30, 60];
 

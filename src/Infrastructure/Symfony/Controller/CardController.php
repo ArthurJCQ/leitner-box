@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace App\Controller;
+namespace Infrastructure\Symfony\Controller;
 
-use App\Entity\Card;
-use App\Form\CardType;
-use App\Repository\CardRepository;
-use App\Service\FileHandler;
-use App\Service\HandleCardSolving;
-use Doctrine\ORM\EntityManagerInterface;
+use Domain\Card;
+use Application\Storage\FileHandlerInterface;
+use Application\UseCase\SolveCardUseCase;
+use Domain\Repository\CardRepositoryInterface;
+use Infrastructure\Doctrine\Persistence\PersistenceAdapter;
+use Infrastructure\Symfony\Form\CardType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
@@ -21,10 +21,10 @@ use Symfony\Component\Routing\Attribute\Route;
 class CardController extends AbstractController
 {
     public function __construct(
-        private readonly CardRepository $cardRepository,
-        private readonly EntityManagerInterface $entityManager,
-        private readonly FileHandler $fileHandler,
-        private readonly HandleCardSolving $handleCardSolving,
+        private readonly CardRepositoryInterface $cardRepository,
+        private readonly PersistenceAdapter $persistenceAdapter,
+        private readonly FileHandlerInterface $fileHandler,
+        private readonly SolveCardUseCase $handleCardSolving,
     ) {
     }
 
@@ -57,8 +57,8 @@ class CardController extends AbstractController
     #[Route('/card/{id}', name: 'app_card_delete', methods: [Request::METHOD_DELETE])]
     public function deleteCard(Card $card): Response
     {
-        $this->entityManager->remove($card);
-        $this->entityManager->flush();
+        $this->cardRepository->remove($card);
+        $this->persistenceAdapter->flush();
 
         return $this->redirectToRoute('app_card');
     }
@@ -82,7 +82,7 @@ class CardController extends AbstractController
             $isSolved ? 'Bonne réponse !' : 'Mauvaise réponse ! À demain pour vous tester à nouveau sur cette carte',
         );
 
-        $this->entityManager->flush();
+        $this->persistenceAdapter->flush();
 
         return $this->redirectToRoute('app_cards_test');
     }
@@ -96,9 +96,9 @@ class CardController extends AbstractController
             $imgFile = $form->get('image')->getData();
             $newFilename = null;
 
-            if ($imgFile) {
+            if ($imgFile instanceof UploadedFile) {
                 try {
-                    $newFilename = $this->fileHandler->handleFile($imgFile);
+                    $newFilename = $this->fileHandler->handleFile($imgFile, 'cardCovers');
                 } catch (FileException $e) {
                     return $this->render('card/form.html.twig', [
                         'form' => $form,
@@ -111,8 +111,8 @@ class CardController extends AbstractController
             $card = $form->getData();
             $card->setImage($newFilename ?? $existingImg);
 
-            $this->entityManager->persist($card);
-            $this->entityManager->flush();
+            $this->cardRepository->store($card);
+            $this->persistenceAdapter->flush();
 
             return $this->redirectToRoute('app_card');
         }

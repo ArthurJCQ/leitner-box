@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace App\Entity;
+namespace Domain;
 
-use App\Repository\CardRepository;
+use Infrastructure\Doctrine\Repository\CardRepositoryDoctrine;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: CardRepository::class)]
+#[ORM\Entity(repositoryClass: CardRepositoryDoctrine::class)]
 class Card
 {
     #[ORM\Id]

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Infrastructure\Doctrine\Repository;
 
-use Domain\Card;
 use Doctrine\ORM\EntityManagerInterface;
+use Domain\Entity\Card;
 use Domain\Repository\CardRepositoryInterface;
 
 /** @extends BaseRepositoryDoctrine<Card> */

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Application\UseCase;
 
-use Domain\Card;
+use Domain\Entity\Card;
 
 readonly class SolveCardUseCase
 {

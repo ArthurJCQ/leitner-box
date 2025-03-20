@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Infrastructure\Symfony\Controller;
 
-use Domain\Card;
 use Application\Storage\FileHandlerInterface;
 use Application\UseCase\SolveCardUseCase;
+use Domain\Entity\Card;
 use Domain\Repository\CardRepositoryInterface;
 use Infrastructure\Doctrine\Persistence\PersistenceAdapter;
 use Infrastructure\Symfony\Form\CardType;

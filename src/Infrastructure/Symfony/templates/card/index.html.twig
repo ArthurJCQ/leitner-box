@@ -1,4 +1,4 @@
-{% extends '../base.html.twig' %}
+{% extends 'base.html.twig' %}
 
 {% block title %}Leitner Box{% endblock %}
 
@@ -14,7 +14,7 @@
     <div class="row">
         {% for card in cards %}
             <div class="card col-md-4 p-0 m-2" style="max-width: 24rem; {{ card.active ? '' : 'filter: grayscale(80%);' }}">
-                <img src="{{ card.image ? asset(image_dir ~ card.image) : default_img_url }}" class="card-img-top" alt="card-image" style="max-height: 300px">
+                <img src="{{ card.image ? asset(image_dir ~ '/' ~ card.image) : default_img_url }}" class="card-img-top" alt="card-image" style="max-height: 300px">
                 <div class="card-body d-flex flex-column justify-content-between">
                     <p class="card-text">{{ card.question }}</p>
                     <div class="d-flex justify-content-between">

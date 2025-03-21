@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Application\UseCase;
+namespace Application;
 
+use Domain\CardRepositoryInterface;
 use Domain\Notification;
-use Domain\Repository\CardRepositoryInterface;
 
 readonly class SendDailyCardsUseCase
 {

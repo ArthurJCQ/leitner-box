@@ -2,9 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Domain\Repository;
-
-use Domain\Entity\Card;
+namespace Domain;
 
 /** @extends BaseRepositoryInterface<Card> */
 interface CardRepositoryInterface extends BaseRepositoryInterface

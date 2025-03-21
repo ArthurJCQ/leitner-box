@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Infrastructure\Symfony\Controller;
 
-use Application\Storage\FileHandlerInterface;
-use Application\UseCase\SolveCardUseCase;
-use Domain\Entity\Card;
-use Domain\Repository\CardRepositoryInterface;
-use Infrastructure\Doctrine\Persistence\PersistenceAdapter;
+use Application\CreateCardUseCase;
+use Application\SolveCardUseCase;
+use Domain\Card;
+use Domain\CardRepositoryInterface;
+use Domain\FileHandlerInterface;
+use Infrastructure\PersistenceAdapter;
 use Infrastructure\Symfony\Form\CardType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Form\FormInterface;
@@ -25,6 +26,7 @@ class CardController extends AbstractController
         private readonly PersistenceAdapter $persistenceAdapter,
         private readonly FileHandlerInterface $fileHandler,
         private readonly SolveCardUseCase $handleCardSolving,
+        private readonly CreateCardUseCase $createCardUseCase,
     ) {
     }
 
@@ -49,7 +51,8 @@ class CardController extends AbstractController
     public function editCard(Card $card, Request $request): Response
     {
         $form = $this->createForm(CardType::class, $card, ['method' => Request::METHOD_PATCH]);
-        $oldCard = $this->cardRepository->findOneBy(['id' => $card->getId()]);
+        // you should use a UseCase
+        $oldCard = $this->cardRepository->findOneBy(['id' => $card->id]);
 
         return $this->handleCardForm($form, $request, $oldCard?->getImage());
     }
@@ -57,6 +60,7 @@ class CardController extends AbstractController
     #[Route('/card/{id}', name: 'app_card_delete', methods: [Request::METHOD_DELETE])]
     public function deleteCard(Card $card): Response
     {
+        // you should use a UseCase
         $this->cardRepository->remove($card);
         $this->persistenceAdapter->flush();
 
@@ -66,6 +70,7 @@ class CardController extends AbstractController
     #[Route('/cards/test', name: 'app_cards_test', methods: [Request::METHOD_GET])]
     public function listCardsToTest(): Response
     {
+        // you should use a UseCase
         $cardsToTest = $this->cardRepository->findTodayCards();
 
         return $this->render('card/test.html.twig', ['cards' => iterator_to_array($cardsToTest)]);
@@ -82,8 +87,6 @@ class CardController extends AbstractController
             $isSolved ? 'Bonne réponse !' : 'Mauvaise réponse ! À demain pour vous tester à nouveau sur cette carte',
         );
 
-        $this->persistenceAdapter->flush();
-
         return $this->redirectToRoute('app_cards_test');
     }
 
@@ -94,25 +97,17 @@ class CardController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var ?UploadedFile $imgFile */
             $imgFile = $form->get('image')->getData();
-            $newFilename = null;
-
-            if ($imgFile instanceof UploadedFile) {
-                try {
-                    $newFilename = $this->fileHandler->handleFile($imgFile, 'cardCovers');
-                } catch (FileException $e) {
-                    return $this->render('card/form.html.twig', [
-                        'form' => $form,
-                        'error' => $e->getMessage(),
-                    ]);
-                }
-            }
 
             /** @var Card $card */
             $card = $form->getData();
-            $card->setImage($newFilename ?? $existingImg);
-
-            $this->cardRepository->store($card);
-            $this->persistenceAdapter->flush();
+            try {
+                $this->createCardUseCase->handle($card, $imgFile, $existingImg);
+            } catch (FileException $e) {
+                return $this->render('card/form.html.twig', [
+                    'form' => $form,
+                    'error' => $e->getMessage(),
+                ]);
+            }
 
             return $this->redirectToRoute('app_card');
         }

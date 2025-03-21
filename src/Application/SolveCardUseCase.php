@@ -2,20 +2,26 @@
 
 declare(strict_types=1);
 
-namespace Application\UseCase;
+namespace Application;
 
-use Domain\Entity\Card;
+use Domain\Card;
+use Domain\PersistenceAdapterInterface;
 
 readonly class SolveCardUseCase
 {
     public const array TEST_DELAY = [1, 3, 7, 15, 30, 60];
+
+    public function __construct(
+        private PersistenceAdapterInterface $persistenceAdapter,
+    ) {
+    }
 
     public function execute(Card $card, string $answer): bool
     {
         $formattedAnswer = strtolower(trim($answer));
 
         // Card solving failed
-        if (strtolower($card->getAnswer()) !== $formattedAnswer) {
+        if (strtolower($card->answer) !== $formattedAnswer) {
             $card->setInitialTestDate(new \DateTime())
                 ->setDelay(1);
 
@@ -23,7 +29,7 @@ readonly class SolveCardUseCase
         }
 
         // Card solving passed
-        $nextDelayKey = array_search($card->getDelay(), self::TEST_DELAY, true) + 1;
+        $nextDelayKey = array_search($card->delay, self::TEST_DELAY, true) + 1;
 
         if (!isset(self::TEST_DELAY[$nextDelayKey])) {
             $card->setInitialTestDate(null)
@@ -34,6 +40,8 @@ readonly class SolveCardUseCase
         }
 
         $card->setDelay(self::TEST_DELAY[$nextDelayKey]);
+
+        $this->persistenceAdapter->flush();
 
         return true;
     }

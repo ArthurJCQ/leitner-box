@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Domain\Repository;
+namespace Domain;
 
 /** @template T of object */
 interface BaseRepositoryInterface

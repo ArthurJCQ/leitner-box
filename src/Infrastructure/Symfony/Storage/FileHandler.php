@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Infrastructure\Symfony\Storage;
 
-use Application\Storage\FileHandlerInterface;
+use Domain\FileHandlerInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\String\Slugger\SluggerInterface;

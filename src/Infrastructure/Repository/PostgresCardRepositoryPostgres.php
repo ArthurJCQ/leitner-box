@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Infrastructure\Doctrine\Repository;
+namespace Infrastructure\Repository;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Domain\Entity\Card;
-use Domain\Repository\CardRepositoryInterface;
+use Domain\Card;
+use Domain\CardRepositoryInterface;
 
-/** @extends BaseRepositoryDoctrine<Card> */
-class CardRepositoryDoctrine extends BaseRepositoryDoctrine implements CardRepositoryInterface
+/** @extends PostgresBaseRepository<Card> */
+class PostgresCardRepositoryPostgres extends PostgresBaseRepository implements CardRepositoryInterface
 {
     public function __construct(protected EntityManagerInterface $em)
     {

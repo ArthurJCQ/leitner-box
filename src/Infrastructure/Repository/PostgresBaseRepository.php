@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Infrastructure\Doctrine\Repository;
+namespace Infrastructure\Repository;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
-use Domain\Repository\BaseRepositoryInterface;
+use Domain\BaseRepositoryInterface;
 
 /** @template T of object */
-abstract class BaseRepositoryDoctrine implements BaseRepositoryInterface
+abstract class PostgresBaseRepository implements BaseRepositoryInterface
 {
     /** @var EntityRepository<T> */
     protected EntityRepository $repository;

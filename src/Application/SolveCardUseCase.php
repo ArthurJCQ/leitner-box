@@ -5,44 +5,32 @@ declare(strict_types=1);
 namespace Application;
 
 use Domain\Card;
+use Domain\CardRepositoryInterface;
 use Domain\PersistenceAdapterInterface;
 
 readonly class SolveCardUseCase
 {
-    public const array TEST_DELAY = [1, 3, 7, 15, 30, 60];
-
     public function __construct(
-        private PersistenceAdapterInterface $persistenceAdapter,
+        private CardRepositoryInterface $cardRepository,
     ) {
     }
 
     public function execute(Card $card, string $answer): bool
     {
-        $formattedAnswer = strtolower(trim($answer));
+        $isCorrect = $card->isAnswerCorrect($answer);
 
-        // Card solving failed
-        if (strtolower($card->answer) !== $formattedAnswer) {
-            $card->setInitialTestDate(new \DateTime())
-                ->setDelay(1);
+        // Update the card based on whether the answer was correct
+        $updatedCard = $isCorrect
+            ? $card->handleSuccessfulAnswer()
+            : $card->handleFailedAnswer();
 
-            return false;
-        }
+        $this->cardRepository->solveCard(
+            $updatedCard->id,
+            $updatedCard->delay,
+            $updatedCard->initialTestDate,
+            $updatedCard->active,
+        );
 
-        // Card solving passed
-        $nextDelayKey = array_search($card->delay, self::TEST_DELAY, true) + 1;
-
-        if (!isset(self::TEST_DELAY[$nextDelayKey])) {
-            $card->setInitialTestDate(null)
-                ->setDelay(0)
-                ->setActive(false);
-
-            return true;
-        }
-
-        $card->setDelay(self::TEST_DELAY[$nextDelayKey]);
-
-        $this->persistenceAdapter->flush();
-
-        return true;
+        return $isCorrect;
     }
 }

@@ -1,0 +1,90 @@
+### Get all cards
+GET http://localhost:8000/
+Accept: application/json
+
+### Get cards available for testing
+GET http://localhost:8000/cards/test
+Accept: application/json
+
+### Create a new card
+POST http://localhost:8000/new
+Content-Type: application/json
+Accept: application/json
+
+{
+  "question": "What is the capital of France?",
+  "answer": "Paris",
+  "active": true,
+  "initialTestDate": "2025-05-20"
+}
+
+### Create a new card with validation error (empty question)
+POST http://localhost:8000/new
+Content-Type: application/json
+Accept: application/json
+
+{
+  "question": "",
+  "answer": "Paris",
+  "active": true
+}
+
+### Create a new card with validation error (empty answer)
+POST http://localhost:8000/new
+Content-Type: application/json
+Accept: application/json
+
+{
+  "question": "What is the capital of France?",
+  "answer": "",
+  "active": true
+}
+
+### Update a card
+PATCH http://localhost:8000/edit/00000000-0000-0000-0000-000000000001
+Content-Type: application/json
+Accept: application/json
+
+{
+  "question": "What is the capital of France?",
+  "answer": "Paris",
+  "active": true,
+  "delay": 3
+}
+
+### Update a card with validation error (empty question)
+PATCH http://localhost:8000/edit/00000000-0000-0000-0000-000000000001
+Content-Type: application/json
+Accept: application/json
+
+{
+  "question": "",
+  "answer": "Paris",
+  "active": true,
+  "delay": 3
+}
+
+### Update a card with validation error (empty answer)
+PATCH http://localhost:8000/edit/00000000-0000-0000-0000-000000000001
+Content-Type: application/json
+Accept: application/json
+
+{
+  "question": "What is the capital of France?",
+  "answer": "",
+  "active": true,
+  "delay": 3
+}
+
+### Delete a card
+DELETE http://localhost:8000/card/00000000-0000-0000-0000-000000000001
+Accept: application/json
+
+### Solve a card
+POST http://localhost:8000/card/solve/b6c21b94-97cf-474f-b25e-3eb707c45c70
+Content-Type: application/json
+Accept: application/json
+
+{
+  "answer": "Paris"
+}

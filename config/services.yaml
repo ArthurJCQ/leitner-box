@@ -33,6 +33,9 @@ services:
         exclude:
             - '../src/Infrastructure/Symfony/DependencyInjection/'
             - '../src/Infrastructure/Symfony/Kernel.php'
-
+    Symfony\Component\ObjectMapper\ObjectMapper:
+        autowire: true
+        autoconfigure: true
+        public: true
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

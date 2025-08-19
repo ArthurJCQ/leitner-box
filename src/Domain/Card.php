@@ -20,14 +20,25 @@ readonly class Card
         public ?\DateTimeInterface $initialTestDate,
         public ?bool $active,
         public int $delay = 1,
-        public ?string $id = null
+        public ?string $id = null,
     ) {
+    }
+
+    public static function create(
+        string $question,
+        string $answer,
+        \DateTimeInterface $initialTestDate,
+        bool $active,
+        int $delay = 1,
+        ?string $id = null,
+    ): self {
+        return new self($question, $answer, $initialTestDate, $active, $delay, $id);
     }
 
     /**
      * Creates a new Card with the updated delay
      *
-     * @throws \InvalidArgumentException If delay is negative
+     * @throws \InvalidArgumentException. If delay is negative.
      */
     public function withDelay(int $delay): self
     {
@@ -41,7 +52,7 @@ readonly class Card
             $this->initialTestDate,
             $this->active,
             $delay,
-            $this->id
+            $this->id,
         );
     }
 
@@ -56,7 +67,7 @@ readonly class Card
             $initialTestDate,
             $this->active,
             $this->delay,
-            $this->id
+            $this->id,
         );
     }
 
@@ -71,7 +82,7 @@ readonly class Card
             $this->initialTestDate,
             $active,
             $this->delay,
-            $this->id
+            $this->id,
         );
     }
 
@@ -118,11 +129,11 @@ readonly class Card
             return false;
         }
 
-        if ($this->initialTestDate === null) {
+        if (!$this->initialTestDate instanceof \DateTime) {
             return false;
         }
 
-        $dueDate = (clone $this->initialTestDate)->modify("+{$this->delay} days");
+        $dueDate = (clone $this->initialTestDate)->modify($this->delay . 'days');
 
         return $dueDate <= new \DateTime('today');
     }

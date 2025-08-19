@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Infrastructure\Symfony\Http\Requests;
 
 use Domain\Card;
-use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\ObjectMapper\Attribute\Map;
 use Symfony\Component\Validator\Constraints as Assert;
 

@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace Infrastructure\Symfony\Controller;
 
-use Application\CardsAvailableToTestUseCase;
 use Application\CreateCardUseCase;
 use Application\DeleteCardUseCase;
-use Application\FindOneCardUseCase;
+use Application\FindOneCardOrNullUseCase;
+use Application\GetTodayAvailableCardsToTestUseCase;
 use Application\SolveCardUseCase;
 use Application\UpdateCardUseCase;
+use Domain\Card;
 use Domain\CardRepositoryInterface;
+use Domain\Exception\CardCreationException;
+use Domain\Exception\CardEditException;
+use Domain\Exception\CardRemovalException;
 use Infrastructure\Symfony\Http\Requests\CreateCardRequest;
 use Infrastructure\Symfony\Http\Requests\TestCardDto;
 use Infrastructure\Symfony\Http\Requests\UpdateCardRequest;
@@ -19,6 +23,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\ObjectMapper\ObjectMapperInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
@@ -31,8 +36,8 @@ class CardController extends AbstractController
         private readonly CreateCardUseCase $createCardUseCase,
         private readonly UpdateCardUseCase $updateCardUseCase,
         private readonly DeleteCardUseCase $deleteCardUseCase,
-        private readonly CardsAvailableToTestUseCase $cardsAvailableToTestUseCase,
-        private readonly FindOneCardUseCase $findOneCardUseCase,
+        private readonly GetTodayAvailableCardsToTestUseCase $cardsAvailableToTestUseCase,
+        private readonly FindOneCardOrNullUseCase $findOneCardUseCase,
         private readonly ObjectMapperInterface $objectMapper,
         private readonly ValidatorInterface $validator,
     ) {
@@ -65,13 +70,18 @@ class CardController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        $card = $this->objectMapper->map($createCardRequest);
-        $this->createCardUseCase->execute($card);
+        $card = $this->objectMapper->map($createCardRequest, Card::class);
 
-        return $this->json([
-            'message' => 'Card created successfully',
-            'card' => $card,
-        ], Response::HTTP_CREATED);
+        try {
+            $this->createCardUseCase->execute($card);
+
+            return $this->json([
+                'message' => 'Card created successfully',
+                'card' => $card,
+            ], Response::HTTP_CREATED);
+        } catch (CardCreationException $e) {
+            throw new BadRequestHttpException('Failed to create card: ' . $e->getMessage(), $e);
+        }
     }
 
     #[Route('/edit/{id}', name: 'app_card_patch', methods: [Request::METHOD_PATCH])]
@@ -97,26 +107,35 @@ class CardController extends AbstractController
             $updateCardRequest->question,
             $updateCardRequest->answer,
             $updateCardRequest->initialTestDate,
-            $updateCardRequest->active
+            $updateCardRequest->active,
         );
 
-        $card = $this->objectMapper->map($updatedRequest);
-        $this->updateCardUseCase->execute($card);
+        $card = $this->objectMapper->map($updatedRequest, Card::class);
 
-        return $this->json([
-            'message' => 'Card updated successfully',
-            'card' => $card,
-        ]);
+        try {
+            $this->updateCardUseCase->execute($card);
+
+            return $this->json([
+                'message' => 'Card updated successfully',
+                'card' => $card,
+            ]);
+        } catch (CardEditException $e) {
+            throw new BadRequestHttpException('Failed to update card: ' . $e->getMessage(), $e);
+        }
     }
 
     #[Route('/card/{id}', name: 'app_card_delete', methods: [Request::METHOD_DELETE])]
     public function deleteCard(string $id): JsonResponse
     {
-        $this->deleteCardUseCase->execute($id);
+        try {
+            $this->deleteCardUseCase->execute($id);
 
-        return $this->json([
-            'message' => 'Card deleted successfully',
-        ]);
+            return $this->json([
+                'message' => 'Card deleted successfully',
+            ]);
+        } catch (CardRemovalException $e) {
+            throw new BadRequestHttpException('Failed to delete card: ' . $e->getMessage(), $e);
+        }
     }
 
     #[Route('/cards/test', name: 'app_cards_test', methods: [Request::METHOD_GET])]
@@ -149,13 +168,22 @@ class CardController extends AbstractController
         }
 
         $data = json_decode($request->getContent(), true, 512, JSON_THROW_ON_ERROR);
+
+        if (!is_array($data)) {
+            throw new BadRequestHttpException('Invalid request body');
+        }
+
         $answer = $data['answer'] ?? '';
 
-        $isSolved = $this->handleCardSolving->execute($card, (string) $answer);
+        try {
+            $isSolved = $this->handleCardSolving->execute($card, (string) $answer);
 
-        return $this->json([
-            'solved' => $isSolved,
-            'message' => $isSolved ? 'Correct answer!' : 'Wrong answer! Try again tomorrow.',
-        ]);
+            return $this->json([
+                'solved' => $isSolved,
+                'message' => $isSolved ? 'Correct answer!' : 'Wrong answer! Try again tomorrow.',
+            ]);
+        } catch (CardEditException $e) {
+            throw new BadRequestHttpException('Failed to process card answer: ' . $e->getMessage(), $e);
+        }
     }
 }

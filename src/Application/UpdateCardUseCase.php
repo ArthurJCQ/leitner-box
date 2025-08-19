@@ -6,6 +6,7 @@ namespace Application;
 
 use Domain\Card;
 use Domain\CardRepositoryInterface;
+use Domain\Exception\CardEditException;
 
 readonly class UpdateCardUseCase
 {
@@ -14,14 +15,9 @@ readonly class UpdateCardUseCase
     ) {
     }
 
+    /** @throws CardEditException */
     public function execute(Card $card): void
     {
-        $this->cardRepository->editCard(
-            $card->id,
-            $card->question,
-            $card->answer,
-            $card->initialTestDate,
-            $card->active,
-        );
+        $this->cardRepository->editCard($card);
     }
 }

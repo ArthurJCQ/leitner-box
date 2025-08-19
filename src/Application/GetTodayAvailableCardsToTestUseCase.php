@@ -6,7 +6,7 @@ namespace Application;
 
 use Domain\CardRepositoryInterface;
 
-readonly class CardsAvailableToTestUseCase
+readonly class GetTodayAvailableCardsToTestUseCase
 {
     public function __construct(
         private CardRepositoryInterface $cardRepository,
@@ -18,9 +18,11 @@ readonly class CardsAvailableToTestUseCase
         $cards = [];
 
         foreach ($this->cardRepository->findTodayCards() as $card) {
-            if ($card->isDueForTesting()) {
-                $cards[] = $card;
+            if (!$card->isDueForTesting()) {
+                continue;
             }
+
+            $cards[] = $card;
         }
 
         return $cards;

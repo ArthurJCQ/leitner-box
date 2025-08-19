@@ -16,7 +16,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 )]
 class DailyTestNotifCommand extends Command
 {
-    public function __construct(private readonly SendDailyCardsUseCase $sendDailyCardsUseCase) {
+    public function __construct(private readonly SendDailyCardsUseCase $sendDailyCardsUseCase)
+    {
         parent::__construct();
     }
 

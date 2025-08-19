@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Application;
 
-use Domain\Card;
 use Domain\CardRepositoryInterface;
-use Domain\PersistenceAdapterInterface;
+use Domain\Exception\CardRemovalException;
 
 readonly class DeleteCardUseCase
 {
@@ -15,6 +14,7 @@ readonly class DeleteCardUseCase
     ) {
     }
 
+    /** @throws CardRemovalException */
     public function execute(string $id): void
     {
         $this->cardRepository->removeCard($id);

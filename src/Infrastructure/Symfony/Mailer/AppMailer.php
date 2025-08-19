@@ -10,7 +10,9 @@ use Symfony\Component\Mime\Email;
 
 readonly class AppMailer implements Notification
 {
-    public function __construct(private MailerInterface $mailer) {}
+    public function __construct(private MailerInterface $mailer)
+    {
+    }
 
     public function sendTestCardsNotification(string $to, string $subject, string $htmlBody): void
     {

@@ -7,7 +7,7 @@ namespace Application;
 use Domain\Card;
 use Domain\CardRepositoryInterface;
 
-readonly class FindOneCardUseCase
+readonly class FindOneCardOrNullUseCase
 {
     public function __construct(private CardRepositoryInterface $cardRepository)
     {

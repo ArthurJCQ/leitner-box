@@ -4,30 +4,24 @@ declare(strict_types=1);
 
 namespace Domain;
 
+use Domain\Exception\CardCreationException;
+use Domain\Exception\CardEditException;
+use Domain\Exception\CardRemovalException;
+
 interface CardRepositoryInterface
 {
     public function listAllCards(): iterable;
 
     public function findCard(string $id): ?Card;
 
-    public function createNewCard(
-        string $question,
-        string $answer,
-        \DateTimeInterface $initialTestDate,
-        bool $active,
-    ): void;
+    /** @throws CardCreationException */
+    public function createNewCard(Card $card): void;
 
-    public function editCard(
-        string $id,
-        string $question,
-        string $answer,
-        \DateTimeInterface $initialTestDate,
-        bool $active,
-    ): void;
+    /** @throws CardEditException */
+    public function editCard(Card $card): void;
 
+    /** @throws CardRemovalException */
     public function removeCard(string $id): void;
-
-    public function solveCard(string $id, int $delay, \DateTimeInterface $initialTestDate, bool $active): void;
 
     /** @return iterable<Card> */
     public function findTodayCards(): iterable;

@@ -6,6 +6,7 @@ namespace Application;
 
 use Domain\Card;
 use Domain\CardRepositoryInterface;
+use Domain\Exception\CardCreationException;
 
 readonly class CreateCardUseCase
 {
@@ -14,13 +15,9 @@ readonly class CreateCardUseCase
     ) {
     }
 
+    /** @throws CardCreationException */
     public function execute(Card $card): void
     {
-        $this->cardRepository->createNewCard(
-            $card->question,
-            $card->answer,
-            $card->initialTestDate,
-            $card->active,
-        );
+        $this->cardRepository->createNewCard($card);
     }
 }

@@ -7,9 +7,9 @@ namespace Infrastructure\Doctrine\Repository;
 use Doctrine\DBAL\Connection;
 use Domain\Card;
 use Domain\CardRepositoryInterface;
-use Domain\Exception\CardCreationException;
-use Domain\Exception\CardEditException;
-use Domain\Exception\CardRemovalException;
+use Domain\Exception\CannotCreateCard;
+use Domain\Exception\CannotEditCard;
+use Domain\Exception\CannotRemoveCard;
 use Ramsey\Uuid\Uuid;
 
 class PostgresCardRepository implements CardRepositoryInterface
@@ -42,7 +42,7 @@ class PostgresCardRepository implements CardRepositoryInterface
                 ])
                 ->executeStatement();
         } catch (\Throwable $e) {
-            throw new CardCreationException('Failed to create card: ' . $e->getMessage(), 0, $e);
+            throw new CannotCreateCard('Failed to create card: ' . $e->getMessage(), 0, $e);
         }
     }
 
@@ -68,7 +68,7 @@ class PostgresCardRepository implements CardRepositoryInterface
                 ])
                 ->executeStatement();
         } catch (\Throwable $e) {
-            throw new CardEditException('Failed to edit card: ' . $e->getMessage(), 0, $e);
+            throw new CannotEditCard('Failed to edit card: ' . $e->getMessage(), 0, $e);
         }
     }
 
@@ -81,7 +81,7 @@ class PostgresCardRepository implements CardRepositoryInterface
                 ->setParameter('id', $id)
                 ->executeStatement();
         } catch (\Throwable $e) {
-            throw new CardRemovalException('Failed to remove card: ' . $e->getMessage(), 0, $e);
+            throw new CannotRemoveCard('Failed to remove card: ' . $e->getMessage(), 0, $e);
         }
     }
 

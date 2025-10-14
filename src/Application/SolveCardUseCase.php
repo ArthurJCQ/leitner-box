@@ -6,7 +6,7 @@ namespace Application;
 
 use Domain\Card;
 use Domain\CardRepositoryInterface;
-use Domain\Exception\CardEditException;
+use Domain\Exception\CannotEditCard;
 
 readonly class SolveCardUseCase
 {
@@ -15,18 +15,14 @@ readonly class SolveCardUseCase
     ) {
     }
 
-    /** @throws CardEditException */
+    /** @throws CannotEditCard */
     public function execute(Card $card, string $answer): bool
     {
-        $isCorrect = $card->isAnswerCorrect($answer);
-
         // Update the card based on whether the answer was correct
-        $updatedCard = $isCorrect
-            ? $card->handleSuccessfulAnswer()
-            : $card->handleFailedAnswer();
+        $updatedCard = $card->resolve($answer);
 
         $this->cardRepository->editCard($updatedCard);
 
-        return $isCorrect;
+        return $card->isAnswerCorrect($answer);
     }
 }

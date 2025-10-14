@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Domain;
 
-use Domain\Exception\CardCreationException;
-use Domain\Exception\CardEditException;
-use Domain\Exception\CardRemovalException;
+use Domain\Exception\CannotCreateCard;
+use Domain\Exception\CannotEditCard;
+use Domain\Exception\CannotRemoveCard;
 
 interface CardRepositoryInterface
 {
@@ -14,13 +14,13 @@ interface CardRepositoryInterface
 
     public function findCard(string $id): ?Card;
 
-    /** @throws CardCreationException */
+    /** @throws CannotCreateCard */
     public function createNewCard(Card $card): void;
 
-    /** @throws CardEditException */
+    /** @throws CannotEditCard */
     public function editCard(Card $card): void;
 
-    /** @throws CardRemovalException */
+    /** @throws CannotRemoveCard */
     public function removeCard(string $id): void;
 
     /** @return iterable<Card> */

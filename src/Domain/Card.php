@@ -95,29 +95,15 @@ readonly class Card
     }
 
     /**
-     * Handles a failed answer attempt by resetting the card's delay and setting the initial test date to now
+     * Resolves the provided answer to the card
      */
-    public function handleFailedAnswer(): self
+    public function resolve(string $answer): self
     {
-        return $this->withInitialTestDate(new \DateTime())
-            ->withDelay(1);
-    }
-
-    /**
-     * Handles a successful answer attempt by incrementing the card's delay according to the Leitner box system
-     * If the card has reached the maximum delay, it will be deactivated
-     */
-    public function handleSuccessfulAnswer(): self
-    {
-        $nextDelayKey = array_search($this->delay, self::TEST_DELAY, true) + 1;
-
-        if (!isset(self::TEST_DELAY[$nextDelayKey])) {
-            return $this->withInitialTestDate(null)
-                ->withDelay(0)
-                ->withActive(false);
+        if ($this->isAnswerCorrect($answer)) {
+            return $this->handleSuccessfulAnswer();
         }
 
-        return $this->withDelay(self::TEST_DELAY[$nextDelayKey]);
+        return $this->handleFailedAnswer();
     }
 
     /**
@@ -136,5 +122,31 @@ readonly class Card
         $dueDate = (clone $this->initialTestDate)->modify($this->delay . 'days');
 
         return $dueDate <= new \DateTime('today');
+    }
+
+    /**
+     * Handles a failed answer attempt by resetting the card's delay and setting the initial test date to now
+     */
+    private function handleFailedAnswer(): self
+    {
+        return $this->withInitialTestDate(new \DateTime())
+            ->withDelay(1);
+    }
+
+    /**
+     * Handles a successful answer attempt by incrementing the card's delay according to the Leitner box system
+     * If the card has reached the maximum delay, it will be deactivated
+     */
+    private function handleSuccessfulAnswer(): self
+    {
+        $nextDelayKey = array_search($this->delay, self::TEST_DELAY, true) + 1;
+
+        if (!isset(self::TEST_DELAY[$nextDelayKey])) {
+            return $this->withInitialTestDate(null)
+                ->withDelay(0)
+                ->withActive(false);
+        }
+
+        return $this->withDelay(self::TEST_DELAY[$nextDelayKey]);
     }
 }

@@ -6,7 +6,7 @@ namespace Application;
 
 use Domain\Card;
 use Domain\CardRepositoryInterface;
-use Domain\Exception\CardCreationException;
+use Domain\Exception\CannotCreateCard;
 
 readonly class CreateCardUseCase
 {
@@ -15,7 +15,7 @@ readonly class CreateCardUseCase
     ) {
     }
 
-    /** @throws CardCreationException */
+    /** @throws CannotCreateCard */
     public function execute(Card $card): void
     {
         $this->cardRepository->createNewCard($card);

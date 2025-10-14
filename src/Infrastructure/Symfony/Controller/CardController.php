@@ -12,9 +12,9 @@ use Application\SolveCardUseCase;
 use Application\UpdateCardUseCase;
 use Domain\Card;
 use Domain\CardRepositoryInterface;
-use Domain\Exception\CardCreationException;
-use Domain\Exception\CardEditException;
-use Domain\Exception\CardRemovalException;
+use Domain\Exception\CannotCreateCard;
+use Domain\Exception\CannotEditCard;
+use Domain\Exception\CannotRemoveCard;
 use Infrastructure\Symfony\Http\Requests\CreateCardRequest;
 use Infrastructure\Symfony\Http\Requests\TestCardDto;
 use Infrastructure\Symfony\Http\Requests\UpdateCardRequest;
@@ -70,7 +70,11 @@ class CardController extends AbstractController
             ], Response::HTTP_BAD_REQUEST);
         }
 
-        $card = $this->objectMapper->map($createCardRequest, Card::class);
+        try {
+            $card = $this->objectMapper->map($createCardRequest, Card::class);
+        } catch (\Throwable $e) {
+            throw new BadRequestHttpException('Failed to map request to card: ' . $e->getMessage(), $e);
+        }
 
         try {
             $this->createCardUseCase->execute($card);
@@ -79,7 +83,7 @@ class CardController extends AbstractController
                 'message' => 'Card created successfully',
                 'card' => $card,
             ], Response::HTTP_CREATED);
-        } catch (CardCreationException $e) {
+        } catch (CannotCreateCard $e) {
             throw new BadRequestHttpException('Failed to create card: ' . $e->getMessage(), $e);
         }
     }
@@ -110,7 +114,11 @@ class CardController extends AbstractController
             $updateCardRequest->active,
         );
 
-        $card = $this->objectMapper->map($updatedRequest, Card::class);
+        try {
+            $card = $this->objectMapper->map($updatedRequest, Card::class);
+        } catch (\Throwable $e) {
+            throw new BadRequestHttpException('Failed to map request to card: ' . $e->getMessage(), $e);
+        }
 
         try {
             $this->updateCardUseCase->execute($card);
@@ -119,7 +127,7 @@ class CardController extends AbstractController
                 'message' => 'Card updated successfully',
                 'card' => $card,
             ]);
-        } catch (CardEditException $e) {
+        } catch (CannotEditCard $e) {
             throw new BadRequestHttpException('Failed to update card: ' . $e->getMessage(), $e);
         }
     }
@@ -133,7 +141,7 @@ class CardController extends AbstractController
             return $this->json([
                 'message' => 'Card deleted successfully',
             ]);
-        } catch (CardRemovalException $e) {
+        } catch (CannotRemoveCard $e) {
             throw new BadRequestHttpException('Failed to delete card: ' . $e->getMessage(), $e);
         }
     }
@@ -182,7 +190,7 @@ class CardController extends AbstractController
                 'solved' => $isSolved,
                 'message' => $isSolved ? 'Correct answer!' : 'Wrong answer! Try again tomorrow.',
             ]);
-        } catch (CardEditException $e) {
+        } catch (CannotEditCard $e) {
             throw new BadRequestHttpException('Failed to process card answer: ' . $e->getMessage(), $e);
         }
     }

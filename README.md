@@ -1,3 +1,5 @@
+
+
 # Leitner Box
 This app is a tutorial for some clean architecture concepts.
 
@@ -20,6 +22,9 @@ Mailpit should be available at http://localhost:1025
 
 ## Usage
 Create some Cards, and run the following command to receive an email in mailpit.
+```shell
+php bin/console app:daily-test-notif
+```
 
 Click on the link in the email to start the daily test.
 
